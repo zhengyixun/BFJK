@@ -36,7 +36,7 @@
         onLoad(){
           let s = wx.getStorageSync("openid");//获取openid
             if(s!==undefined&&s!==null&&s!==""){
-                mpvue.navigateTo({ url:'../index/main' })
+                mpvue.reLaunch({ url:'../index/main' })
             }
         },
         methods:{
@@ -111,17 +111,19 @@
                 let that = this;
                 wx.login({
                     success:function (e) {
+                        console.log(e);
                         that.$httpWX.post({//--获取openid
                             url: 'GetOpenId',
                             data: {wxCode:e.code}
                         }).then(res => {
                             let d = JSON.parse(res.d);
-                            let sess = d.openid;//
+                            let sess = d.openid;//-
+                            console.log(d);
                             wx.setStorageSync("openid",d.openid);
                             //---------------------------------------------开始注册
-                            that.$httpWX.post({//--获取openid
+                            that.$httpWX.post({//--
                                 url: 'Region',
-                                data: {mobile:that.phone, smscode:that.code, openid :sess}
+                                data: {mobile:that.phone, smscode:that.code, openid :sess}//--手机号验证码openid
                             }).then(res => {
                                 let d = JSON.parse(res.d);
                                 console.log(d);

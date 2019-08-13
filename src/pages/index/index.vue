@@ -187,7 +187,6 @@ export default {
               data: { openid, type,sex, year, term }
           }).then((e)=>{
             let data = JSON.parse(e.d);
-            console.log(data);
             //处理mark avg
               data.list.forEach((item,index)=>{
                  let mult = this.get_unit(item.type).mult;
@@ -201,7 +200,6 @@ export default {
                  item.max = parseFloat(item.max / mult).toFixed(2);
                  item.min = parseFloat(item.min / mult).toFixed(2);
                  item.max_del = Math.abs(parseFloat(item.max - this.nomal_mark).toFixed(2));
-                  console.log(item);
                   if(isNaN(item.max_del)){
                       item.max_del = '0.00'
                   }
@@ -253,6 +251,8 @@ export default {
           }).then((e)=>{
               let d = JSON.parse(e.d);
               console.log(d);
+              this.score_data2 = [];
+              this.score_data1 = [];
               this.userinfo['name'] = d.name;
               this.userinfo['sex'] = (d.sex==="1"?"男":"女");
               this.nomal_sex = d.sex; //性别请求数据用
@@ -304,6 +304,7 @@ export default {
                   }
               });
               //下面的评分和是否优秀
+
               d.evaluate.forEach((item,index)=>{
                   if(item.value === "" ){
                       item.value ="未测试";

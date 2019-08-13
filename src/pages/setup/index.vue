@@ -44,6 +44,9 @@
           <span></span>
         </div>
       </view>
+      <view class="login_out" @click="login_out">
+        退出
+      </view>
     </div>
 </template>
 
@@ -73,6 +76,11 @@
                 mpvue.navigateTo({
                     url:'../aboutus/main'
                 })
+            },
+            login_out(){
+                //退出登录并清除缓存
+                wx.removeStorageSync("openid");
+                mpvue.reLaunch({ url:'../login/main' })
             }
         }
     }
@@ -114,5 +122,9 @@
   }
   .r{
     display: block;float: right;width: 30rpx;height: 30rpx;margin-top: 35rpx;margin-left: 10rpx;
+  }
+  .login_out{
+    width: 80%;height: 80rpx;margin: 30rpx auto;background: rgb(82,82,110);text-align: center;line-height: 80rpx;color: #fff;
+    border-radius: 40rpx;font-size: 30rpx;
   }
 </style>

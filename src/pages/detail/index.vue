@@ -98,7 +98,6 @@ import Headers from "@/components/header";
             this.type = d.type;
             this.sex = d.sex;
             this.get_term_list();
-            console.log(d.data_list);
             d.data_list.forEach((item,index)=>{
               if(this.type_arr.indexOf(parseInt(item.id)) <0){ //不属于国标八项，没有评分
                 item.score = "--"
@@ -120,7 +119,6 @@ import Headers from "@/components/header";
                 this.term_page = e.target.current;
                 this.now_year = this.term_list[e.target.current].year; //改变之后的年
                 this.now_term = this.term_list[e.target.current].term; //改变之后的学期
-                console.log(this.term_list[e.target.current]);
                 //重新绘制图表
                 this.get_type_data(this.type,this.now_year,this.now_term);
             },
@@ -132,7 +130,6 @@ import Headers from "@/components/header";
                 //data_list的值改变
                 //重新绘制图表
                 this.get_type_data(this.type,this.now_year,this.now_term);
-                console.log(e)
             },
             //获取学期
             get_term_list(){
@@ -171,7 +168,6 @@ import Headers from "@/components/header";
                         type,sex:this.sex,year, term }
                 }).then((e)=>{
                     let data = JSON.parse(e.d);
-                    console.log(data);
                     if(data.success===false){
                         this.data_list[this.type_index]['score'] = "未测";
                         this.data_list[this.type_index]['mark'] = "未测";
@@ -180,12 +176,9 @@ import Headers from "@/components/header";
                         this.make_charts([],[],[]);
                     }else{
                         let xdata=[],y1data=[],y2data=[];
-                        console.log(data.list);
                         data.list.forEach((item,index)=>{
                             if(index === 0){
                                 this.new_mark = item.mark / this.mult;//成绩
-                                this.new_score = item.score;//评分
-                                this.data_list[this.type_index]['score'] = item.score ;
                                 this.data_list[this.type_index]['mark'] = item.mark / this.mult;
                                 //在这里计算是提升还是降低,要加一层判断，时间，非时间的升降相反
                                 let time_arr=[3,4,5,6,8,9,11,12,14];
@@ -209,7 +202,16 @@ import Headers from "@/components/header";
                             }
                             xdata.push(index +1);
                             y1data.unshift(item.mark / this.mult);
-                            y2data.unshift(item.score);
+                            if(this.type_arr.indexOf(parseInt(type)) > -1){//此判断代表属于国标八项，非国标八项不显示评分。
+                                y2data.push(item.score);
+                                this.new_score = item.score;//评分
+                                this.data_list[this.type_index]['score'] = item.score ;
+                            }else{
+                                y2data.push(0);
+                                this.new_score = "--";//评分
+                                this.data_list[this.type_index]['score'] = "--" ;
+                            }
+
                         });
 
                         this.make_charts(xdata,y1data,y2data);
@@ -336,7 +338,7 @@ import Headers from "@/components/header";
     width: 90%;height: 500rpx;margin: 0 auto;
   }
 .charts > canvas{
-  width: 100%;height: 100%;
+  width: 92%;height: 100%;
 }
 .score{
   width:80%;margin: 0 auto;text-align: center;
@@ -348,10 +350,10 @@ import Headers from "@/components/header";
     position: relative;
   }
   #canvas > .right{
-    position: absolute;right: 0;width: 30rpx;height: 100%;top:10rpx;
+    position: absolute;right: 0;width: 40rpx;height: 100%;top:10rpx;
   }
 .right > text{
-  font-size: 20rpx;margin-bottom: 47rpx;display: block;color: rgb(153,153,153);
+  font-size: 20rpx;margin-bottom: 47rpx;display: block;color: rgb(153,153,153);text-align: left;
 }
   .b{
     font-size: 45rpx;font-weight: 800;

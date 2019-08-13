@@ -13,7 +13,7 @@
                   <text class="time">{{item.intime}}</text>
                   <view class="test_bot">
                     <view>
-                      <text>{{item.mark}}<text style="font-size: 25rpx;color: #999">/{{item.unit}}</text></text>
+                      <text>{{item.mark}}<text style="font-size: 25rpx;color: #999">{{item.unit}}</text></text>
                       <text>成绩</text>
                     </view>
                     <view>
@@ -21,7 +21,7 @@
                       <text>较上次</text>
                     </view>
                     <view>
-                      <text>{{item.score}}分</text>
+                      <text>{{item.score}}</text>
                       <text>评分</text>
                     </view>
                   </view>
@@ -33,7 +33,7 @@
       </div>
 <!--      切换学期-->
       <div class="term">
-        <swiper :duration="duration" :current="1" previous-margin="100rpx" next-margin="100rpx" easing-function="easeInOutCubic" :circular="true" @change="term_change">
+        <swiper :duration="duration" :current="1" previous-margin="140rpx" next-margin="140rpx" easing-function="easeInOutCubic" :circular="true" @change="term_change">
           <block v-for="(item, index) in term_list" :key="index">
             <swiper-item class="test_child">
               <view :class="term_page == index?'term_selected':''" :data="item.year + '-' + item.term">{{item.year}}{{item.term === "1"?"下":"上"}}学期</view>
@@ -45,7 +45,7 @@
       <view class="now_time">{{now_time}}</view>
       <view class="score">
         <text>成绩：<text class="b">{{new_mark}}</text>{{unit}}</text>
-        <text>评分：<text class="b">{{new_score}}</text>分</text>
+        <text>评分：<text class="b">{{new_score}}</text></text>
       </view>
       <view class="charts"  id="canvas">
         <canvas canvas-id="canvas"></canvas>
@@ -88,7 +88,8 @@ import Headers from "@/components/header";
                 now_year:"",
                 now_term:"",
                 new_score:"",
-                new_mark:""
+                new_mark:"",
+                type_arr:[1,2,3,5,6,7,8,99,98],//国标八项
             }
         },
         onLoad(opt){
@@ -98,16 +99,22 @@ import Headers from "@/components/header";
             this.sex = d.sex;
             this.get_term_list();
             console.log(d.data_list);
+            d.data_list.forEach((item,index)=>{
+              if(this.type_arr.indexOf(parseInt(item.id)) <0){ //不属于国标八项，没有评分
+                item.score = "--"
+              }
+            });
             this.data_list = d.data_list;
             this.type_index = d.data_index;//控制显示第几条-最上面的轮播
 
-
-            let time = new Date();
-            let arr = time.toLocaleDateString().split("/");
-            this.now_time = arr[0] + '年' + arr[1] + '月' + arr[2] + '日 ' + new Date().toLocaleTimeString();
-
+            this.get_time();
         },
         methods:{
+            //获取当前时间
+            get_time(){
+                let d = new Date();
+                this.now_time = d.getFullYear() + "年" + d.getMonth() + '月' + d.getDate() + "日 " + d.getHours() + ":"+d.getMinutes();
+            },
             //学期切换
             term_change(e){
                 this.term_page = e.target.current;
@@ -136,11 +143,12 @@ import Headers from "@/components/header";
                 }).then((e)=>{
                     this.term_list=[];
                     let data = JSON.parse(e.d);
-                    let now_year = ((new Date()).toLocaleDateString()).replace(/\//g, "-");
+                    let d = new Date();
+                    let now_year = d.getFullYear() + "-" + d.getMonth() + '-' + d.getDate() + " " + d.getHours() + ":"+d.getMinutes();
                     data.list.forEach((item,index)=>{
                         if(item.end < now_year){
                             this.term_list.push(item);
-                            if(new Date(now_year) < new Date(item.end)  && new Date(now_year) >=new Date(item.start)){ //大于开始日期，小于结束日期
+                            if(new Date(now_year) < new Date(item.end)  && new Date(now_year) >=new Date(item.start)){ //-大于开始日期，小于结束日期
                                 this.now_year=item.year;//当前处于的年份学期
                                 this.now_term=item.term;
                             }
@@ -172,26 +180,32 @@ import Headers from "@/components/header";
                         this.make_charts([],[],[]);
                     }else{
                         let xdata=[],y1data=[],y2data=[];
+                        console.log(data.list);
                         data.list.forEach((item,index)=>{
                             if(index === 0){
                                 this.new_mark = item.mark / this.mult;//成绩
                                 this.new_score = item.score;//评分
-                                //data_list的值随之改变
-                                this.data_list[this.type_index]['score'] = item.score;
+                                this.data_list[this.type_index]['score'] = item.score ;
                                 this.data_list[this.type_index]['mark'] = item.mark / this.mult;
-                                //在这里计算是提升还是降低
-                                if(data.list[0]['mark']>=data.list[1]['mark']){
-                                    console.log('升');
-                                    this.data_list[this.type_index]['up_down'] = "升";
-                                    console.log(this.data_list[this.type_index]['change_mark']);
-                                    this.data_list[this.type_index]['change_mark'] = ((data.list[0]['mark'] - data.list[1]['mark'])/ this.mult).toFixed(1);
+                                //在这里计算是提升还是降低,要加一层判断，时间，非时间的升降相反
+                                let time_arr=[3,4,5,6,8,9,11,12,14];
+                                if(time_arr.indexOf(parseInt(type)) < 0){ //不是时间标准
+                                    console.log("不是时间标准");
+                                    if(data.list[0]['mark']>=data.list[1]['mark']){
+                                        this.data_list[this.type_index]['up_down'] = "升";
+                                    }else{
+                                        this.data_list[this.type_index]['up_down'] = "降";
+                                    }
                                 }else{
-                                    console.log('降');
-                                    this.data_list[this.type_index]['up_down'] = "降";
-                                    this.data_list[this.type_index]['change_mark'] = ((data.list[1]['mark'] - data.list[0]['mark'])/ this.mult).toFixed(1);
-
-                                    console.log((data.list[1]['mark'] - data.list[0]['mark'])/ this.mult);
+                                    console.log("是时间标准");
+                                    if(data.list[0]['mark']>=data.list[1]['mark']){
+                                        this.data_list[this.type_index]['up_down'] = "降";
+                                    }else{
+                                        this.data_list[this.type_index]['up_down'] = "升";
+                                    }
                                 }
+
+                                this.data_list[this.type_index]['change_mark'] = parseFloat(Math.abs((data.list[0]['mark'] - data.list[1]['mark'])/ this.mult)).toFixed(2);
                             }
                             xdata.push(index +1);
                             y1data.unshift(item.mark / this.mult);
@@ -203,6 +217,7 @@ import Headers from "@/components/header";
                 })
             },
             make_charts(xdata,y1data,y2data){
+                let that = this;
                 let h,w;
                 //创建节点选择器
                 let query = wx.createSelectorQuery();
@@ -223,7 +238,7 @@ import Headers from "@/components/header";
                             name: '成绩',
                             data: y1data,//成绩
                             format: function (val) {
-                                return val + 's';
+                                return val + that.unit;
                             }
                         }, {
                             name: '评分',
@@ -281,10 +296,10 @@ import Headers from "@/components/header";
   margin-left: 20rpx;font-size: 23rpx;color: #999;
 }
   .test_bot{
-    width: 100%;height: 200rpx;
+    width: 100%;height: 200rpx;display: flex;justify-content: space-around;
   }
 .test_bot> view{
-  width: 33.333333%;height: 90%;float: left;background: #fff;
+  height: 90%;float: left;background: #fff;
 }
 .test_bot> view > text{
   display: block;width: 100%;text-align: center;
@@ -299,7 +314,7 @@ import Headers from "@/components/header";
   font-size: 25rpx;color: #999;
 }
   .term{
-    width: 65%;height: 60rpx;margin: 30rpx auto;
+    width: 70%;height: 60rpx;margin: 30rpx auto;
   }
 .term > swiper{
   width: 100%;height: 100%;
@@ -308,7 +323,7 @@ import Headers from "@/components/header";
 
   }
 .test_child > view{
-  width: 90%;height: 100%;margin: 0 auto;font-size: 27rpx;border-radius: 30rpx;overflow: hidden;text-align: center;
+  width: 100%;height: 100%;margin: 0 auto;font-size: 27rpx;border-radius: 30rpx;overflow: hidden;text-align: center;
   line-height: 60rpx;
 }
   .term_selected{
@@ -324,7 +339,7 @@ import Headers from "@/components/header";
   width: 100%;height: 100%;
 }
 .score{
-  width: 60%;margin: 0 auto;
+  width:80%;margin: 0 auto;text-align: center;
 }
 .score > text{
   margin-right: 20rpx;

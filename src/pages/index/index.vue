@@ -104,6 +104,7 @@ export default {
             group_name:"",
             mobile:""
         },
+        nomal_mark:"0",//--------------默认成绩
         nomal_sex:"",//性别
         nomal_type:"",//----------------------------默认的type类型
         page_index:"1",
@@ -173,7 +174,10 @@ export default {
           this.page_index = e.target.current;
           //班级年级省级等 0 班级 1 年级 2 市级 3 省级 4 全国。
           this.nomal_type = this.data_list[e.target.current]['id'];
-          console.log(this.nomal_type);
+
+          //切换的时候存下当前成绩
+          console.log(this.data_list[e.target.current]['mark']);
+          this.nomal_mark = this.data_list[e.target.current]['mark'];
           this.get_compare_data(wx.getStorageSync("openid"),this.nomal_type,this.nomal_sex,this.now_year,this.now_term);
       },
       //获取比较数据 - 班级 年级 省级 全国
@@ -183,14 +187,24 @@ export default {
               data: { openid, type,sex, year, term }
           }).then((e)=>{
             let data = JSON.parse(e.d);
-            console.log(data.list);
+            console.log(data);
             //处理mark avg
               data.list.forEach((item,index)=>{
                  let mult = this.get_unit(item.type).mult;
+                 let arr = [3,4,14,5,6,8];//时间
+                 if(arr.indexOf(parseInt(item.type)) > -1){ //根据类型区分时间和非时间，如果是时间 最大值和最小值 进行交换
+                    let temp = item.max;
+                     item.max = item.min;
+                     item.min = temp;
+                 }
                  item.avg = parseFloat(item.avg/ mult).toFixed(2);
                  item.max = parseFloat(item.max / mult).toFixed(2);
                  item.min = parseFloat(item.min / mult).toFixed(2);
-                 item.max_del = parseFloat(item.max - item.min).toFixed(2);
+                 item.max_del = Math.abs(parseFloat(item.max - this.nomal_mark).toFixed(2));
+                  console.log(item);
+                  if(isNaN(item.max_del)){
+                      item.max_del = '0.00'
+                  }
               });
             this.compare_data = data.list
           })
@@ -251,11 +265,12 @@ export default {
               this.page_total = d.test.length; //总页数
               //20项测试数据
               d.test.forEach((item,index)=>{
-                  if(index === 0){
-                      this.nomal_type = item.id;
-                  }
                   item.unit = this.get_unit(item.id)['unit'];
                   item.mult = this.get_unit(item.id)['mult'];
+                  if(index === 0){
+                      this.nomal_type = item.id;
+                      this.nomal_mark = item.mark / item.mult;
+                  }
                   item.img_url = "http://server.yphtoy.com/img/wx/parent/"+(index+1)+".png";
                   if(item.mark === null ||item.mark === undefined ||item.mark === ""){
                       item.mark = "未测试";
@@ -365,10 +380,10 @@ export default {
     font-size: 25rpx;line-height: 120rpx;color: #666;
   }
   .s_child {
-
+    padding-top: 10rpx;
   }
   .s_child > view{
-    height: 100%;width: 100%;background: #fff;border-radius: 10rpx;margin: 5%;
+    height: 100%;width: 100%;background: #fff;border-radius: 10rpx;margin:0 5%;
   }
   .pro{
     font-size: 35rpx;font-weight: 800;color: #666;display: block;width: 95%;padding: 5% 0 0 5%;
@@ -383,10 +398,10 @@ export default {
     font-size: 27rpx;color: #999;padding-left: 5%;
   }
   .swiperz{
-    margin-bottom: 30rpx;height: 230rpx;
+    margin-bottom: 30rpx;height: 235rpx;
   }
   .swiper{
-    height: 230rpx;
+    height: 235rpx;
   }
   .card{
     width: 95%;margin: 0 auto;display: flex;justify-content: space-around;padding-bottom: 20rpx;

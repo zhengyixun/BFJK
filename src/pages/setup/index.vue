@@ -89,13 +89,13 @@
     font-size: 30rpx;color: #999;
   }
   .left{
-    width: 150rpx;height: 150rpx;float: left;margin-top: 25rpx;margin-right: 20rpx;
+    width: 150rpx;height: 150rpx;float: left;margin-top: 25rpx;margin-right: 20rpx;border-radius: 50%;overflow: hidden;
   }
   #img{
-    width: 100%;height: 100%;border-radius: 50%;overflow: hidden;
+    width: 100%;height: 100%;
   }
   .right{
-    float: left;height: 150rpx;margin-top: 45rpx;font-size: 30rpx;line-height: 50rpx;
+    float: left;height: 150rpx;margin-top:51rpx;font-size: 30rpx;line-height: 50rpx;
   }
   #bot{
     width: auto;background-color: #fff;

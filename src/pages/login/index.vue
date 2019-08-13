@@ -25,7 +25,7 @@
         name: "index",
         data(){
             return{
-                phone:"151581711361",
+                phone:"",
                 code:"",
                 code_num:60,
                 code_span:"发送验证码",
@@ -47,7 +47,7 @@
                 if(this.code_flag){
                     //检查并判断手机号格式
                     let flag = this.$check("phone",this.phone);
-                    if(flag){//验证通过
+                    if(flag||1==1){//验证通过
                         this.code_flag = false;
                         //时间函数
                         let t = setInterval(()=>{
@@ -79,12 +79,15 @@
                     }else{
                         wx.showToast({
                             title:"手机号格式错误",
+                            //https://server.yphtoy.com/img/wx/warn.png
+                            image:"/static/images/warn.png",
                             mask:true,
                         });
                     }
                 }else{
                     wx.showToast({
-                        title:"请在"+this.code_num + "秒后重试",
+                        title:"请在"+this.code_num + "秒后再试",
+                        image:"/static/images/warn.png",
                         mask:true
                     })
                 }

@@ -17,7 +17,7 @@ import Headers from "@/components/header";
             return{
                 to_header:{
                     back_url:'/pages/setup/main', //要返回的地址
-                    header_text:" ", //头文字
+                    header_text:"关于我们", //头文字
                     is_bg:false
                 },
             }

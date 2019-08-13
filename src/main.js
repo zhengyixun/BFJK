@@ -54,7 +54,7 @@ Vue.prototype.get_unit=function(type){
   } else if (type == 2) {//网球掷远
     obj.mult = 10000;
     obj.unit = "m";
-  } else if (type == 3 || type == 4 || type == 15) {//10米折返跑  10米折返爬  15米障碍跑
+  } else if (type == 3 || type == 4 || type == 14) {//10米折返跑  10米折返爬  15米障碍跑
     obj.mult = 100;
     obj.unit = "s";
   } else if (type == 5) {//单脚站

@@ -8,7 +8,7 @@
         <h1>快捷认证</h1>
         <div class="input_box">
           <label for="phone">手机号:</label>
-          <input type="number" id="phone" placeholder="请输入手机号" v-model="phone">
+          <input type="number" id="phone" placeholder="请输入手机号" v-model="phone" ref="phones">
           <span @tap="get_code">{{code_span}}</span>
         </div>
         <div class="input_box">
@@ -35,18 +35,20 @@
         //加载完成事件
         onLoad(){
           let s = wx.getStorageSync("openid");//获取openid
-            if(s!==undefined&&s!==null&&s!==""){
-                mpvue.reLaunch({ url:'../index/main' })
-            }
+          if(s!==undefined&&s!==null&&s!==""){
+              mpvue.reLaunch({ url:'../index/main' })
+          }
         },
         methods:{
             //获取二维码
-            get_code(){
+            get_code(e){
+
                 wx.hideLoading();
                 //是否允许发送验证码
                 if(this.code_flag){
                     //检查并判断手机号格式
                     let flag = this.$check("phone",this.phone);
+
                     if(flag||1==1){//验证通过
                         this.code_flag = false;
                         //时间函数

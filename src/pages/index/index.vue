@@ -15,13 +15,12 @@
       </div>
 <!--      左右滚动-->
       <div class="swiperz">
-        <swiper class="swiper"  :duration="duration" previous-margin="240rpx" next-margin="240rpx" easing-function="easeInOutCubic" :circular="true" @change="swiper_change">
+        <swiper class="swiper"  :duration="duration" previous-margin="200rpx" next-margin="200rpx" easing-function="easeInOutCubic" :circular="true" @change="swiper_change">
           <block v-for="(item, index) in data_list" :key="index">
             <swiper-item class="s_child"  @tap="to_detail(item,index)">
               <view style="position: relative">
                 <text class="pro">{{item.name}}</text>
-                <text class="test_mark">{{item.mark}}</text>
-                <text class="unit">{{item.unit}}</text>
+                <text class="test_mark">{{item.mark}}<text class="unit">/{{item.unit}}</text></text>
                 <text class="test_time">{{item.intime}}</text>
                 <img :src="item.img_url" alt="" class="test_img"/>
               </view>
@@ -36,7 +35,7 @@
         <div class="card_info_top">
           <img src="https://server.yphtoy.com/img/wx/c.png" class="img_icon" alt="">
           <text>{{compare_data.length!==0?compare_data[current]['name']:""}}</text>
-          <text>人数：{{compare_data.length!==0?compare_data[current]['cou']:""}}人</text>
+          <text>{{userinfo.sex}}生：{{compare_data.length!==0?compare_data[current]['cou']:""}}人</text>
           <text>项目:{{compare_data.length!=0?compare_data[current]['typename']:""}}</text>
           <img :src="img_arr[current]" class="right_img" alt="">
         </div>
@@ -140,7 +139,6 @@ export default {
   methods: {
       //跳转到详情页
       to_detail(item,index){
-          console.log(item);
           let data = {
               name:item.name,
               type:item.id,
@@ -176,7 +174,6 @@ export default {
           this.nomal_type = this.data_list[e.target.current]['id'];
 
           //切换的时候存下当前成绩
-          console.log(this.data_list[e.target.current]['mark']);
           this.nomal_mark = this.data_list[e.target.current]['mark'];
           this.get_compare_data(wx.getStorageSync("openid"),this.nomal_type,this.nomal_sex,this.now_year,this.now_term);
       },
@@ -250,7 +247,6 @@ export default {
               data: { openid:wx.getStorageSync('openid'),  year:this.now_year, term:this.now_term }
           }).then((e)=>{
               let d = JSON.parse(e.d);
-              console.log(d);
               this.score_data2 = [];
               this.score_data1 = [];
               this.userinfo['name'] = d.name;
@@ -288,7 +284,7 @@ export default {
                       this.userinfo.height = item.mark+ 'cm';
                       this.score_data1.push({
                           type: item.name,
-                          value:item.score,//评分1
+                          value:Math.abs(item.score),//评分1
                           score_text:item.score_text,
                           img_url:"http://server.yphtoy.com/img/wx/parent/3_1.png"
                       });
@@ -297,7 +293,7 @@ export default {
                       this.userinfo.weight = item.mark + 'kg';
                       this.score_data1.push({
                           type: item.name,
-                          value:item.score,//评分1
+                          value:Math.abs(item.score),//评分1
                           score_text:item.score_text,
                           img_url:"http://server.yphtoy.com/img/wx/parent/3_2.png"
                       });
@@ -311,6 +307,7 @@ export default {
                       item.score_text = "";
                   }else{
                       item.score_text = this.score_text(item.value);
+                      item.value = Math.abs(item.value);//取绝对值
                   }
                   if(index === 3){
                       item.img_url= "http://server.yphtoy.com/img/wx/parent/3_3.png";
@@ -341,6 +338,7 @@ export default {
   }
   .top{
     width: 100%;height:200rpx;background: linear-gradient(to left,rgb(82,82,110),rgb(125,128,156));padding-top: 150rpx;
+    position: relative;
   }
   .top > .img{
     width: 125rpx;height: 125rpx;margin-left: 50rpx;float: left;display: block;border-radius: 50%;overflow: hidden;
@@ -353,7 +351,8 @@ export default {
     color: #fff;display: block;float: left;margin-top: 20rpx;margin-left:10rpx;font-size: 35rpx;margin-right: 20rpx;
   }
   .set_up{
-    float: right;margin-right: 50rpx;margin-top: -20rpx;width: 40rpx;height: 40rpx;
+    width: 40rpx;height: 40rpx;
+    position: absolute;right: 50rpx;bottom: 110rpx;
   }
   .set_up > img{
     width: 100%;height: 100%;
@@ -390,10 +389,10 @@ export default {
     font-size: 35rpx;font-weight: 800;color: #666;display: block;width: 95%;padding: 5% 0 0 5%;
   }
   .test_mark{
-    display: block;color: rgb(0,191,86);font-size: 55rpx;font-weight: 800;padding-left: 5%;
+    display: block;color: rgb(0,191,86);font-size: 55rpx;font-weight: 800;padding-left: 5%;margin-bottom: 5rpx;margin-top: 5rpx;
   }
   .unit{
-    font-size: 27rpx;color: #999;display: block;padding-left: 5%;
+    font-size: 27rpx;color: #999;
   }
   .test_time{
     font-size: 27rpx;color: #999;padding-left: 5%;
@@ -471,7 +470,7 @@ export default {
     display: block;padding-bottom: 30rpx;width: 100%;text-align: center;color: #ccc;font-size: 20rpx;padding-top: 20rpx;
   }
   .test_img{
-    position: absolute;width: 67rpx;height: 90rpx;right: 36rpx;top:28rpx;opacity: 0.2;
+    position: absolute;width: 50rpx;max-height: 60rpx;right: 36rpx;top:28rpx;opacity: 0.2;
   }
   .birth{
     float: left;font-size: 30rpx;

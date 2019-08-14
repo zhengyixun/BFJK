@@ -168,57 +168,70 @@ import Headers from "@/components/header";
                         type,sex:this.sex,year, term }
                 }).then((e)=>{
                     let data = JSON.parse(e.d);
+                    let xdata=[],y1data=[],y2data=[];
                     if(data.success===false){
                         this.data_list[this.type_index]['score'] = "未测";
                         this.data_list[this.type_index]['mark'] = "未测";
                         this.data_list[this.type_index]['up_down'] = "--";
                         this.data_list[this.type_index]['change_mark'] = "未测";
-                        this.make_charts([],[],[]);
                     }else{
-                        let xdata=[],y1data=[],y2data=[];
+
                         data.list.forEach((item,index)=>{
+
                             if(index === 0){
                                 this.new_mark = item.mark / this.mult;//成绩
                                 this.data_list[this.type_index]['mark'] = item.mark / this.mult;
                                 //在这里计算是提升还是降低,要加一层判断，时间，非时间的升降相反
                                 let time_arr=[3,4,5,6,8,9,11,12,14];
-                                if(time_arr.indexOf(parseInt(type)) < 0){ //不是时间标准
-                                    console.log("不是时间标准");
-                                    if(data.list[0]['mark']>=data.list[1]['mark']){
-                                        this.data_list[this.type_index]['up_down'] = "升";
+                                if(data.list.length >1){
+                                    if(time_arr.indexOf(parseInt(type)) < 0){ //不是时间标准
+                                        console.log("不是时间标准");
+                                        if(data.list[0]['mark']>=data.list[1]['mark']){
+                                            this.data_list[this.type_index]['up_down'] = "升";
+                                        }else{
+                                            this.data_list[this.type_index]['up_down'] = "降";
+                                        }
                                     }else{
-                                        this.data_list[this.type_index]['up_down'] = "降";
+                                        console.log("是时间标准");
+                                        if(data.list[0]['mark']>=data.list[1]['mark']){
+                                            this.data_list[this.type_index]['up_down'] = "降";
+                                        }else{
+                                            this.data_list[this.type_index]['up_down'] = "升";
+                                        }
                                     }
+                                    this.data_list[this.type_index]['change_mark'] = parseFloat(Math.abs((data.list[0]['mark'] - data.list[1]['mark'])/ this.mult)).toFixed(2);
                                 }else{
-                                    console.log("是时间标准");
-                                    if(data.list[0]['mark']>=data.list[1]['mark']){
-                                        this.data_list[this.type_index]['up_down'] = "降";
-                                    }else{
-                                        this.data_list[this.type_index]['up_down'] = "升";
-                                    }
+                                   this.data_list[this.type_index]['up_down'] = "--";
+                                   this.data_list[this.type_index]['change_mark'] = "0.00";
                                 }
-
-                                this.data_list[this.type_index]['change_mark'] = parseFloat(Math.abs((data.list[0]['mark'] - data.list[1]['mark'])/ this.mult)).toFixed(2);
                             }
+
                             xdata.push(index +1);
                             y1data.unshift(item.mark / this.mult);
                             if(this.type_arr.indexOf(parseInt(type)) > -1){//此判断代表属于国标八项，非国标八项不显示评分。
-                                y2data.push(item.score);
-                                this.new_score = item.score;//评分
-                                this.data_list[this.type_index]['score'] = item.score ;
+                                y2data.unshift(item.score);
+                                if(index === 0){ //index===0 代表是最新一条数据
+                                    this.new_score = item.score;//评分
+                                    this.data_list[this.type_index]['score'] = item.score ;
+                                }
                             }else{
-                                y2data.push(0);
+                                y2data.unshift(0);
                                 this.new_score = "--";//评分
                                 this.data_list[this.type_index]['score'] = "--" ;
                             }
 
                         });
 
-                        this.make_charts(xdata,y1data,y2data);
                     }
+                    console.log(11);
+                    console.log(xdata);
+                    console.log(y1data);
+                    console.log(y2data);
+                    this.make_charts(xdata,y1data,y2data);
                 })
             },
             make_charts(xdata,y1data,y2data){
+                console.log("已触发");
                 let that = this;
                 let h,w;
                 //创建节点选择器
